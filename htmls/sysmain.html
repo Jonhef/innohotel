@@ -128,28 +128,7 @@
             $("select#id-select-getusers").on("change", function() {
                 $('input[name="id-option-getusers"]').val(this.value)
             })
-            function send() {
-                alert($.ajax({
-                    url: "/adduser",
-                    type: "POST",
-                    dataType: "json",
-                    data: `{"user":"${$("#user").val()}", "pass":"${$("#pass").val()}", "role":"${$("#role").val()}", "name":"${$("#name").val()}"}`,
-                    success: function(data) {
-                        console.log(data)
-                    },
-                    error: function(jqXHR, exception) { 
-                        alert(jqXHR.responseText);
-                    }
-                }).statusText)
-            }
             $(document).ready(() => {
-                $("#submitbutton").on("click", send);
-                /* $(".number").on("change paste", () => {
-                    if ($(this.element).val().match(/^\d+$/).length != 0) {
-                        alert("You mustn't write any text here");
-                    }
-                    $(this.element).val($(this).val().replace(/^\D+$/, ""));
-                }) */
                 $("#submitbutton-addroom").on("click", () => {
                     let check = checkForNotNumber($("#number").val()) && checkForNotNumber($("#luxurylevel").val()) && checkForNotNumber($("#numberofguests").val()) && checkForNotNumber($("#floor").val()) && checkForNotNumber($("#priceforanight").val())
                     if (!check) {
@@ -252,114 +231,6 @@
                         });
                         alert("")
                     }
-                })
-            
-                $("#deleteuser").on("click", () => {
-                    let userResp = confirm("Would you really like to delete this user?")
-                    let check = checkForNotNumber($("#iduserdel").val())
-                    if (!check) {
-                        return
-                    }
-                    console.log(userResp);
-                    if (!userResp) {
-                        return;
-                    }
-                    $.ajax({
-                        url: "/deluser",
-                        type: "POST",
-                        dataType: "json",
-                        data: JSON.stringify({
-                            "id": $("#iduserdel").val()
-                        }),
-                        success: (data) => {
-                            console.log(data);
-                        },
-                        error: (jqXHR, exception) => {
-                            console.log(jqXHR);
-                            console.log(exception);
-                        }
-                    });
-                    alert("")
-                });
-            
-                $("#submitbutton-edituser").on("click", () => {
-                    let data = {}
-                    let get = (object, key, default_value = undefined) => {
-                        var result = object[key];
-                        return (typeof result !== "undefined") ? result : default_value;
-                    };
-                    let check = checkForNotNumber($("#id-edit-user").val())
-                    if (!check) {
-                        return
-                    }
-                    const idents = [
-                        "id-edit-user", 
-                        "user-edit",
-                        "role-edit",
-                        "name-edit",
-                        "pass-edit"
-                    ]
-                    idents.forEach((i) => {
-                        console.log(i);
-                        console.log($(`#${i}`).val());
-                        if ($(`#${i}`).val()) {
-                            data[i.replace("-edit", "").replace("-user", "")] = $(`#${i}`).val()
-                        }
-                    });
-                    if (get(data, "id") === undefined) {
-                        alert("There isn't any identificator")
-                    }
-                    else {
-                        $.ajax({
-                            url: "/edituser",
-                            type: "POST",
-                            dataType: "json",
-                            data: JSON.stringify(data),
-                            success: (data) => {
-                                console.log(data)
-                            },
-                            error: (jqXHR, exception) => {
-                                console.log(jqXHR);
-                                console.log(exception);
-                            }
-                        });
-                        alert("")
-                    }
-                });
-
-                $("#get-users").on("click", () => {
-                    let data = {}
-                    if ($("#id-getusers").val() !== undefined && $("#id-getusers").val() !== "") {
-                        data["id"] = [$("#id-getusers").val(), $("#id-select-getusers").val()]
-                    }
-                    if ($("#username-getusers").val() !== undefined && $("#username-getusers").val() !== "") {
-                        data["username"] = [$("#username-getusers"), $("#username-select-getusers").val()]
-                    }
-                    if ($("#password-getusers").val() !== undefined && $("#password-getusers").val() !== "") {
-                        data["passwordhash"] = [$("#password-getusers").val(), $("#password-select-getusers").val()]
-                    }
-                    if ($("#role-getusers").val() !== undefined && $("#role-getusers").val() !== "") {
-                        data["role"] = [$("#role-getusers").val(), $("#role-select-getusers").val()]
-                    }
-                    if ($("#name-getusers").val() !== undefined && $("#name-getusers").val() !== "") {
-                        data["name"] = [$("#name-getusers").val(), $("#name-select-getusers").val()]
-                    }
-                    console.log(JSON.stringify(data))
-                    $.ajax({
-                        url: "/getusers",
-                        type: "POST",
-                        dataType: "json",
-                        data: JSON.stringify(data),
-                        success: (data) => {
-                            $("#users-table-text").html(data);
-                        },
-                        error: (jqXHR, exception) => {
-                            console.log(jqXHR);
-                            console.log(jqXHR.responseText)
-                            $("#users-table-text").html(jqXHR.responseText);
-                            console.log(exception)
-                        }
-                    });
                 })
                 $("#get-rooms").on("click", () => {
                     let data = {}
@@ -670,38 +541,6 @@
             })
         </script>
         <div id="forms">
-            <form id="adduser" autocomplete="off">
-                <p class="header">Add user</p>
-                <input type="text" id="user" placeholder="username" />
-                <input name="role" hidden id="role"/>
-                <select id="roles">
-                    <option value="0">0 - standart role</option>
-                    <option value="1">1 - sysadmin</option>
-                    <option value="2">2 - superadmin</option>
-                </select>
-                <input type="text" id="name" placeholder="name" />
-                <input type="pass" id="pass" placeholder="password" />
-                <button type="button" id="submitbutton">ADD</button>
-            </form>
-            <form id="edituser" autocomplete="off">
-                <p class="header">Edit user</p>
-                <input class="number" id="id-edit-user" placeholder="User id"/>
-                <input type="text" id="user-edit" placeholder="username" />
-                <input name="role-edit" hidden id="role-edit"/>
-                <select id="roles-edit">
-                    <option value="0">0 - standart role</option>
-                    <option value="1">1 - sysadmin</option>
-                    <option value="2">2 - superadmin</option>
-                </select>
-                <input type="text" id="name-edit" placeholder="name" />
-                <input type="pass" id="pass-edit" placeholder="password" />
-                <button type="button" id="submitbutton-edituser">EDIT</button>
-            </form>
-            <form autocomplete="off" id="deluser">
-                <p class="header">Delete user</p>
-                <input  class="number" id="iduserdel" placeholder="userid" />
-                <button type="button" id="deleteuser">DELETE</button>
-            </form>
             <form autocomplete="off" id="addroom">
                 <p class="header">Add room</p>
                 <input  class="number" id="number" placeholder="it must be unique" />
@@ -807,57 +646,6 @@
             </form>
         </div>
         <div id="gets">
-            <form autocomplete="off">
-                <button type="button" id="get-users">Get users</button>
-                <input type="text" id="id-getusers" placeholder="user id">
-                <select id="id-select-getusers">
-                    <option value="=">equal</option>
-                    <option value=">">more</option>
-                    <option value=">=">more or equal</option>
-                    <option value="<">less</option>
-                    <option value="=<">less or equal</option>
-                    <option value="!=">not equal</option>
-                </select>
-                <input type="text" id="username-getusers" placeholder="username">
-                <select id="username-select-getusers">
-                    <option value="=">equal</option>
-                    <option value=">">more</option>
-                    <option value=">=">more or equal</option>
-                    <option value="<">less</option>
-                    <option value="=<">less or equal</option>
-                    <option value="!=">not equal</option>
-                </select>
-                <input type="text" id="password-getusers" placeholder="password(only equal or not!!!)" style="width: 170px;">
-                <input id="password-option-getusers" hidden value="=">
-                <select id="password-select-getusers">
-                    <option value="=">equal</option>
-                    <option value="!=">not equal</option>
-                </select>
-                <select id="role-getusers">
-                    <option value="">clear value</option>
-                    <option value="0">0 - standart role</option>
-                    <option value="1">1 - sysadmin</option>
-                    <option value="2">2 - superadmin</option>
-                </select>
-                <select id="role-select-getusers">
-                    <option value="=">equal</option>
-                    <option value=">">more</option>
-                    <option value=">=">more or equal</option>
-                    <option value="<">less</option>
-                    <option value="=<">less or equal</option>
-                    <option value="!=">not equal</option>
-                </select>
-                <input id="name-getusers" placeholder="name">
-                <select id="name-select-getusers">
-                    <option value="=">equal</option>
-                    <option value=">">more</option>
-                    <option value=">=">more or equal</option>
-                    <option value="<">less</option>
-                    <option value="=<">less or equal</option>
-                    <option value="!=">not equal</option>
-                </select>
-                <div id="users-table-text"></div>
-            </form>
             <form autocomplete="off">
                 <button type="button" id="get-rooms">Get rooms</button>
                 <input id="number-getrooms" placeholder="number">
